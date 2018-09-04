@@ -16,22 +16,22 @@ func udpTransmit(outUdpChan <-chan string){
 		panic(err)
 	}
 	
-	fmt.Printf("%s", hex.Dump(decodedHex))
-	
-	hostName 	:= "192.168.187.131"
-    portNum 	:= "8080"
-    service 	:= hostName + ":" + portNum
-	
-    udpAddr, err := net.ResolveUDPAddr("udp", service)
-    if err != nil {
-            log.Fatal(err)
-    }
-	
-    // setup listener for incoming UDP connection
-    ln, err := net.ListenUDP("udp", udpAddr)
-	if err != nil {
-            log.Fatal(err)
-    }
+	//fmt.Printf("%s", hex.Dump(decodedHex))
+	//
+	//hostName 	:= "192.168.187.131"
+    //portNum 	:= "8080"
+    //service 	:= hostName + ":" + portNum
+	//
+    //udpAddr, err := net.ResolveUDPAddr("udp", service)
+    //if err != nil {
+    //        log.Fatal(err)
+    //}
+	//
+    //// setup listener for incoming UDP connection
+    //ln, err := net.ListenUDP("udp", udpAddr)
+	//if err != nil {
+    //        log.Fatal(err)
+    //}
 	
 	//go KeepAliveResponse(decodedHex)
 	
@@ -40,10 +40,10 @@ func udpTransmit(outUdpChan <-chan string){
 	
     for {
 		outUDP := <-outUdpChan
-		_, err = ln.WriteToUDP([]byte(outUDP), udpAddr)
-		if err != nil {
-				log.Println(err)
-		}
+		//_, err = ln.WriteToUDP([]byte(outUDP), udpAddr)
+		//if err != nil {
+		//		log.Println(err)
+		//}
 		
 		fmt.Printf("%s", hex.Dump(outUDP))
     }
