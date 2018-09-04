@@ -30,8 +30,8 @@ func procPackets(inUDPChan <-chan string, outUDPChan chan<- string){
 			log.Fatal(err)
 		}
 		
-		fmt.Printf("%s", hex.Dump(destringifiedData))
-		fmt.Println()
+		//fmt.Printf("%s", hex.Dump(destringifiedData))
+		//fmt.Println()
 		
 		// Slice Packet Length
 		//packetLen := binary.LittleEndian.Uint16(destringifiedData[2:4])
