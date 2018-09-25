@@ -2,7 +2,7 @@ package metricFuncs
 
 import (
 	"encoding/hex"
-	"encoding/json"
+	//	"encoding/json"
 	"fmt"
 )
 
@@ -138,12 +138,12 @@ func MetricFunc(metricChan <-chan string) {
 		packetIn = headerSlice[:80]
 
 		// Packet Identifiers
-		SeqNo := packetIn[0:1]
-		SlotID := packetIn[1:2]
+		//SeqNo := packetIn[0:1]
+		//SlotID := packetIn[1:2]
 
 		// Slice GPS Data - Slice all 28 bytes (+ 2 devID Bytes) & pass to function
 		gpsIn = packetIn[2:32]
-		devID := gpsSlicer(gpsIn, &gpsData)
+		/*devID*/ _ = gpsSlicer(gpsIn, &gpsData)
 
 		//Error Clear Statement for testing. Remove for final version
 		//devID += 2
@@ -167,12 +167,12 @@ func MetricFunc(metricChan <-chan string) {
 		fenwayMetrics.MaxSpeed = decodedMetrics.MaxSpeed
 		fenwayMetrics.TotalDistance = decodedMetrics.TotalDistance
 
-		jsonOut, err := json.Marshal(fenwayMetrics)
+		//jsonOut, err := json.Marshal(fenwayMetrics)
 		if err != nil {
 			fmt.Println("error:", err)
 		}
 
-		//*/
+		/*/
 		// Output tests
 		fmt.Println("SeqNo 		- ", SeqNo)
 		fmt.Println("SlotID 		- ", SlotID)
@@ -285,11 +285,11 @@ func MetricFunc(metricChan <-chan string) {
 		fmt.Println()
 		//*/
 
-		//*/
+		/*/
 		fmt.Println(string(jsonOut))
 		fmt.Println()
-		//*/
+		/*/
 
-		fmt.Println()
+		//fmt.Println()
 	}
 }

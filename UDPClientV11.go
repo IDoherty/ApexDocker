@@ -12,6 +12,7 @@ import (
 	//"encoding/binary"
 	"pkg/aggFuncs"
 	"pkg/metricFuncs"
+	"pkg/udpServer"
 )
 
 /* A Simple function to verify error */
@@ -33,7 +34,6 @@ var udp UDPServer
 func main() {
 
 	// Build/Read Variables
-
 	keepAlive, err := hex.DecodeString("03010100")
 
 	if err != nil {
@@ -62,7 +62,8 @@ func main() {
 	go aggFuncs.ProcPackets(inUDPChan, outUDPChan, metricChan, keepAlive)
 
 	// Start UDP Distribution Thread
-	go aggFuncs.UdpTransmit(outUDPChan, keepAlive)
+	//go aggFuncs.UdpTransmit(outUDPChan)
+	go udpServer.UdpServer(outUDPChan)
 
 	// Start Metric Processing Thread
 	go metricFuncs.MetricFunc(metricChan)

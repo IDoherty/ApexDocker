@@ -1,7 +1,7 @@
 package aggFuncs
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 
 	//"time"
@@ -36,9 +36,9 @@ func procPackets(inUDPChan <-chan string, outUDPChan chan<- string, metricChan c
 
 		// Filter out KA responses and test Validity for incoming packets
 		if binary.LittleEndian.Uint16(destringifiedData[0:2]) == packetTest {
-			fmt.Println("Keep Alive Packet: Processing")
+			//fmt.Println("Keep Alive Packet: Processing")
 			//fmt.Printf("%s", hex.Dump(destringifiedData))
-			fmt.Println()
+			//fmt.Println()
 
 		} else {
 			seqNo := destringifiedData[4:5]

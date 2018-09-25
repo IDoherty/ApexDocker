@@ -74,7 +74,7 @@ func TestValidity(lastVals *LastPacket, testNo byte, testTime uint32) (bool, int
 //}
 
 // Distribute Validated Packets to other programs and services
-func UdpTransmit(outUDPChan <-chan string, keepAlive []byte) {
+func UdpTransmit(outUDPChan <-chan string) {
 
-	udpTransmit(outUDPChan, keepAlive)
+	udpTransmit(outUDPChan)
 }

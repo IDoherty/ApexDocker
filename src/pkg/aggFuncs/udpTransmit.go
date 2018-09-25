@@ -15,9 +15,9 @@ type UDPServer struct {
 
 var udp UDPServer
 
-func udpTransmit(outUdpChan <-chan string, keepAlive []byte) {
+func udpTransmit(outUdpChan <-chan string) {
 
-	keepAliveTestVal := binary.LittleEndian.Uint32(keepAlive[0:4])
+	var keepAliveTestVal uint32 = 65795
 
 	keepAliveResponse := "55dd1e0003010100f6012402bdbd1a23454a0100cd79050004003b21d2d41490efb6dd55"
 
