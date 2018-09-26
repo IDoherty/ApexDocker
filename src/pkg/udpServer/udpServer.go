@@ -18,8 +18,9 @@ type UdpClientStruct struct {
 }
 
 type UDPServer struct {
-	addr   string
-	server *net.UDPConn
+	addr    string
+	server  *net.UDPConn
+	udpAddr *net.UDPAddr
 }
 
 type PortStruct struct {
@@ -33,19 +34,25 @@ var KeepAliveTestVal uint32 = 65795
 // Declare Indexing Variable and Slice
 var ClientIndex int = 0
 var indexSlice []int
+
+//var indexPtr = &indexSlice
 var tempIndex int
 
 var MAX_CLIENTS int = 4
 var numClients int = 0
+var clientPtr = &numClients
 
 // Declare Server Struct
 var udp UDPServer
 
 // Declare Client Address Slice
 var UdpClient []UdpClientStruct
+var udpClientptr = &UdpClient
 
 // Declare Flags and Channels for Removal of GoRoutines
 var RemovalRequired bool = false
+var removalPtr = &RemovalRequired
+
 var running bool = false
 
 // Declare Mutex for Add/Remove Operations
@@ -74,13 +81,14 @@ func UdpServer(outUdpChan <-chan string) {
 	DeadChan := make(chan int, 5)
 	RemoveChan := make(chan int, 4)
 
-	go removeFlag(DeadChan, RemoveChan, RemovalRequired)
+	go removeFlag(DeadChan, RemoveChan, removalPtr)
 
 	for {
 
 		// Add Client and Start Writing Data to it
 		if numClients < MAX_CLIENTS {
 
+			// Test Available Ports for Usage
 			for j := 0; j < MAX_CLIENTS; j++ {
 
 				if portNum[j].portBound == false {
@@ -89,19 +97,19 @@ func UdpServer(outUdpChan <-chan string) {
 					break
 				}
 			}
+			fmt.Println("portNum: ", portNum)
 
 			// Resolve Local Address
 			laddr, err := net.ResolveUDPAddr("udp", udp.addr)
 			if err != nil {
 				log.Fatal(err)
 			}
-
+			// Split here and Form Listener Threads to next Break
 			// setup listener for incoming UDP connection
 			udp.server, err = net.ListenUDP("udp", laddr)
 			if err != nil {
 				log.Fatal(err)
 			}
-			defer udp.server.Close()
 
 			fmt.Println("UDP server up and listening on: ", laddr)
 
@@ -129,7 +137,7 @@ func UdpServer(outUdpChan <-chan string) {
 			//fmt.Println("UdpClient Values: ", len(UdpClient))
 
 			AddRemoveMutex.Lock()
-			go udpClientRead(UdpClient[tempIndex], udp.server, DeadChan, &RemovalRequired)
+			go udpClientRead(UdpClient[tempIndex], udp.server, DeadChan)
 			AddRemoveMutex.Unlock()
 
 			fmt.Println("New Client - ", UdpClient[tempIndex].clientAddr)
@@ -138,11 +146,11 @@ func UdpServer(outUdpChan <-chan string) {
 		// Add reciever function for deadChan and setup the Client Removal Function
 		// Add Clone function for outChan. One channel for each Indexed Client
 		if running == false {
-			go func(RemoveChan <-chan int, RemovalRequired bool) {
+			go func(RemoveChan <-chan int, clients *int, indexSlice []int) {
 				fmt.Println("Closer Started")
 				for {
-					if RemovalRequired == true {
-						deadIndex := <-RemoveChan
+					select {
+					case deadIndex := <-RemoveChan:
 						fmt.Println(deadIndex)
 
 						AddRemoveMutex.Lock()
@@ -150,29 +158,31 @@ func UdpServer(outUdpChan <-chan string) {
 						for i := range indexSlice {
 							if indexSlice[i] == deadIndex {
 								indexSlice = append(indexSlice[:i], indexSlice[i:]...)
+								portNum[i].portBound = false
 							}
 						}
-
-						numClients--
 						AddRemoveMutex.Unlock()
-					}
-					fmt.Println("Removal - ", RemovalRequired)
-					time.Sleep(time.Second * 5)
-				}
-			}(RemoveChan, RemovalRequired)
 
-			go func(outUdpChan <-chan string) {
+						*clients--
+
+					case <-time.After(5 * time.Second):
+						fmt.Println("Number of Clients - ", *clients)
+					}
+				}
+			}(RemoveChan, clientPtr, indexSlice)
+
+			go func(outUdpChan <-chan string, udpClientptr *[]UdpClientStruct) {
 				fmt.Println("Cloner Started")
 				for {
 					cloneVal := <-outUdpChan
-					udpRange := len(UdpClient)
-					fmt.Println("Number of Write Channels - ", udpRange)
+					udpRange := len(*udpClientptr)
+					fmt.Println("Number of Write Channels - ", udpRange, udpClientptr)
 
 					for i := 0; i < udpRange; i++ {
 						UdpClient[i].writeUdpChan <- cloneVal
 					}
 				}
-			}(outUdpChan)
+			}(outUdpChan, udpClientptr)
 
 			running = true
 		}
